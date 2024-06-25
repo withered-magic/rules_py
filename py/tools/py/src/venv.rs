@@ -13,6 +13,8 @@ pub fn create_venv(
     version: &str,
     location: &Path,
     pth_file: Option<PthFile>,
+    build_workspace_dir: Option<&Path>,
+    additional_workspace_paths: Option<&[String]>,
 ) -> miette::Result<()> {
     // Parse and find the interpreter to use.
     // Do this first so that incase we can't find or parse the version, we don't
@@ -51,7 +53,11 @@ pub fn create_venv(
         .into_diagnostic()?;
 
     if let Some(pth) = pth_file {
-        pth.set_up_site_packages(&venv_location.join(install_paths.platlib()))?
+        pth.set_up_site_packages(
+            &venv_location.join(install_paths.platlib()),
+            build_workspace_dir,
+            additional_workspace_paths,
+        )?
     }
 
     Ok(())

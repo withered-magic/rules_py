@@ -1,8 +1,8 @@
 """Implementation for the py_binary and py_test rules."""
 
-load("@rules_python//python:defs.bzl", "PyInfo")
-load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_locations", "expand_variables")
+load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
+load("@rules_python//python:defs.bzl", "PyInfo")
 load("//py/private:py_library.bzl", _py_library = "py_library_utils")
 load("//py/private:py_semantics.bzl", _py_semantics = "semantics")
 load("//py/private/toolchain:types.bzl", "PY_TOOLCHAIN", "VENV_TOOLCHAIN")
@@ -172,7 +172,7 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(python_version = "3.8.12", is_default = False)
 python.toolchain(python_version = "3.9", is_default = True)
 ```
-"""
+""",
     ),
     "_run_tmpl": attr.label(
         allow_single_file = True,
@@ -211,7 +211,7 @@ py_base = struct(
         PY_TOOLCHAIN,
         VENV_TOOLCHAIN,
     ],
-    cfg = _python_version_transition
+    cfg = _python_version_transition,
 )
 
 py_binary = rule(
@@ -220,7 +220,7 @@ py_binary = rule(
     attrs = py_base.attrs,
     toolchains = py_base.toolchains,
     executable = True,
-    cfg = py_base.cfg
+    cfg = py_base.cfg,
 )
 
 py_test = rule(
@@ -229,5 +229,5 @@ py_test = rule(
     attrs = py_base.attrs,
     toolchains = py_base.toolchains,
     test = True,
-    cfg = py_base.cfg
+    cfg = py_base.cfg,
 )

@@ -19,7 +19,12 @@ impl PthFile {
         }
     }
 
-    pub fn set_up_site_packages(&self, dest: &Path) -> miette::Result<()> {
+    pub fn set_up_site_packages(
+        &self,
+        dest: &Path,
+        build_workspace_dir: Option<&Path>,
+        additional_workspace_paths: Option<&[String]>,
+    ) -> miette::Result<()> {
         let source_pth = File::open(self.src.as_path())
             .into_diagnostic()
             .wrap_err("Unable to open source .pth file")?;
@@ -54,6 +59,21 @@ impl PthFile {
                         .into_diagnostic()
                         .wrap_err("Unable to write new .pth file entry")?;
                 }
+            }
+        }
+
+        if let Some(build_workspace_dir) = build_workspace_dir {
+            for path in additional_workspace_paths
+                .iter()
+                .flat_map(|paths| paths.iter())
+            {
+                writeln!(
+                    writer,
+                    "{}",
+                    build_workspace_dir.join(path).to_string_lossy()
+                )
+                .into_diagnostic()
+                .wrap_err("Unable to write new .pth file entry")?;
             }
         }
 

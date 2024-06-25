@@ -27,6 +27,15 @@ struct VenvArgs {
     /// Prefix to append to each .pth path entry.
     #[arg(long)]
     pth_entry_prefix: Option<String>,
+
+    /// Path to the current Bazel workspace.
+    /// Corresponds to the `BUILD_WORKSPACE_DIRECTORY` environment variable.
+    #[arg(long, env = "BUILD_WORKSPACE_DIRECTORY")]
+    build_workspace_directory: Option<PathBuf>,
+
+    /// Additional paths relative to the current Bazel workspace to be added as .pth path entries.
+    #[arg(long, value_delimiter = ',', num_args = 1..)]
+    additional_workspace_paths: Option<Vec<String>>,
 }
 
 fn venv_cmd_handler(args: VenvArgs) -> miette::Result<()> {
@@ -36,6 +45,10 @@ fn venv_cmd_handler(args: VenvArgs) -> miette::Result<()> {
         &args.python_version,
         &args.location,
         Some(pth_file),
+        args.build_workspace_directory.as_deref(),
+        args.additional_workspace_paths
+            .as_ref()
+            .map(|s| s.as_slice()),
     )
 }
 
