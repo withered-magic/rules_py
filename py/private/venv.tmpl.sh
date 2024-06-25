@@ -23,10 +23,21 @@ function alocation {
 VENV_TOOL="$(rlocation {{VENV_TOOL}})"
 VENV_ROOT="${BUILD_WORKSPACE_DIRECTORY}"
 VIRTUAL_ENV="$(alocation "${VENV_ROOT}/{{ARG_VENV_LOCATION}}")"
+ARG_PTH_FILE="$(rlocation {{ARG_PTH_FILE}})"
+ARG_PTH_FILE_COPY="${ARG_PTH_FILE}.copy.pth"
+
+cp "${ARG_PTH_FILE}" "${ARG_PTH_FILE_COPY}"
+chmod 0644 "${ARG_PTH_FILE_COPY}"
+
+# Add additional paths to the pth file.
+{{ADDITIONAL_WORKSPACE_PATHS_DECL}}
+for path in "${additional_workspace_paths[@]}"; do
+  echo "${BUILD_WORKSPACE_DIRECTORY}/${path}" >> "${ARG_PTH_FILE_COPY}"
+done
 
 "${VENV_TOOL}" \
     --location "${VIRTUAL_ENV}" \
     --python "$(alocation $(rlocation {{ARG_PYTHON}}))" \
     --python-version "{{ARG_VENV_PYTHON_VERSION}}" \
-    --pth-file "$(rlocation {{ARG_PTH_FILE}})" \
+    --pth-file "${ARG_PTH_FILE_COPY}" \
     --pth-entry-prefix "${RUNFILES_DIR}"

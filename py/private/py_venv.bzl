@@ -1,8 +1,8 @@
 """Implementation for the py_binary and py_test rules."""
 
-load("@rules_python//python:defs.bzl", "PyInfo")
 load("@aspect_bazel_lib//lib:paths.bzl", "BASH_RLOCATION_FUNCTION", "to_rlocation_path")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@rules_python//python:defs.bzl", "PyInfo")
 load("//py/private:providers.bzl", "PyVirtualInfo")
 load("//py/private:py_library.bzl", _py_library = "py_library_utils")
 load("//py/private:py_semantics.bzl", _py_semantics = "semantics")
@@ -56,6 +56,7 @@ def _py_venv_rule_imp(ctx):
                 py_toolchain.interpreter_version_info.major,
             ),
             "{{RUNFILES_INTERPRETER}}": str(py_toolchain.runfiles_interpreter).lower(),
+            "{{ADDITIONAL_WORKSPACE_PATHS_DECL}}": "additional_workspace_paths=({})".format(" ".join(ctx.attr.additional_workspace_paths)),
         },
         is_executable = True,
     )
@@ -107,6 +108,10 @@ _py_venv = rule(
         ),
         "resolutions": attr.label_keyed_string_dict(
             doc = "FIXME",
+        ),
+        "additional_workspace_paths": attr.string_list(
+            doc = "Additional paths relative to the current Bazel workspace to be added as .pth path entries.",
+            default = [],
         ),
         "_venv_tmpl": attr.label(
             allow_single_file = True,
