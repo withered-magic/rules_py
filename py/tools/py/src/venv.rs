@@ -1,6 +1,6 @@
 use std::{
     fs::{self},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use miette::{Context, IntoDiagnostic};
@@ -16,6 +16,8 @@ pub fn create_venv(
     pth_file: Option<PthFile>,
     collision_strategy: SymlinkCollisionResolutionStrategy,
     venv_name: &str,
+    additional_paths: Option<Vec<PathBuf>>,
+    include_default_site_packages: bool,
 ) -> miette::Result<()> {
     if location.exists() {
         // Clear down the an old venv if there is one present.
@@ -60,6 +62,8 @@ pub fn create_venv(
         let site_packages_options = SitePackageOptions {
             dest: venv_location.join(site_package_path),
             collision_strategy,
+            additional_paths,
+            include_default_site_packages,
         };
 
         pth.set_up_site_packages(site_packages_options)?

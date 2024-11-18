@@ -1,7 +1,9 @@
+use core::str;
 use std::{
     fs::{self, DirEntry, File},
     io::{BufRead, BufReader, BufWriter, Read, Write},
     path::{Path, PathBuf},
+    process::Command,
 };
 
 use miette::{miette, Context, IntoDiagnostic, LabeledSpan, MietteDiagnostic, Severity};
@@ -27,6 +29,11 @@ pub struct SitePackageOptions {
 
     /// Collision strategy determining the action taken when sylinks in the venv collide.
     pub collision_strategy: SymlinkCollisionResolutionStrategy,
+
+    /// Additional paths to append as-is to the pth file.
+    pub additional_paths: Option<Vec<PathBuf>>,
+
+    pub include_default_site_packages: bool,
 }
 
 pub struct PthFile {
@@ -78,6 +85,28 @@ impl PthFile {
                     writeln!(writer, "{}", entry.to_string_lossy())
                         .into_diagnostic()
                         .wrap_err("Unable to write new .pth file entry")?;
+                }
+            }
+        }
+
+        for path in opts.additional_paths.into_iter().flatten() {
+            writeln!(writer, "{}", path.to_string_lossy())
+                .into_diagnostic()
+                .wrap_err("Unable to write new .pth file entry")?;
+        }
+
+        if opts.include_default_site_packages {
+            match get_default_site_packages_dirs() {
+                Ok(dirs) => {
+                    for dir in dirs {
+                        eprintln!("Adding path: {:?}", dir);
+                        writeln!(writer, "{}", dir.to_string_lossy())
+                            .into_diagnostic()
+                            .wrap_err("Unable to write new .pth file entry")?;
+                    }
+                }
+                Err(err) => {
+                    eprintln!("Failed to get default site-packages: {:?}", err);
                 }
             }
         }
@@ -245,5 +274,14 @@ fn is_same_file(p1: &Path, p2: &Path) -> miette::Result<bool> {
         }
     }
 
-    return Ok(true);
+    Ok(true)
+}
+
+fn get_default_site_packages_dirs() -> miette::Result<Vec<PathBuf>> {
+    let output = Command::new("python3").args([
+        "-c",
+        "import sys\nfor path in [path for path in sys.path if path.endswith('site-packages')]: print(path)",
+    ]).output().into_diagnostic()?;
+    let stdout = str::from_utf8(&output.stdout).into_diagnostic()?;
+    Ok(stdout.lines().map(PathBuf::from).collect())
 }

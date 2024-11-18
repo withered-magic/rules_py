@@ -55,6 +55,12 @@ struct VenvArgs {
     /// activate scripts.
     #[arg(long)]
     venv_name: String,
+
+    #[arg(long)]
+    additional_paths: Option<Vec<PathBuf>>,
+
+    #[arg(long)]
+    include_default_site_packages: bool,
 }
 
 fn venv_cmd_handler(args: VenvArgs) -> miette::Result<()> {
@@ -65,6 +71,8 @@ fn venv_cmd_handler(args: VenvArgs) -> miette::Result<()> {
         Some(pth_file),
         args.collision_strategy.unwrap_or_default().into(),
         &args.venv_name,
+        args.additional_paths,
+        args.include_default_site_packages,
     )
 }
 

@@ -39,11 +39,12 @@ VIRTUAL_ENV="$(alocation "${RUNFILES_DIR}/{{ARG_VENV_NAME}}")"
 export VIRTUAL_ENV
 
 "${VENV_TOOL}" \
-    --location "${VIRTUAL_ENV}" \
-    --python "$(python_location)" \
-    --pth-file "$(rlocation {{ARG_PTH_FILE}})" \
-    --collision-strategy "{{ARG_COLLISION_STRATEGY}}" \
-    --venv-name "{{ARG_VENV_NAME}}"
+  --location "${VIRTUAL_ENV}" \
+  --python "$(python_location)" \
+  --pth-file "$(rlocation {{ARG_PTH_FILE}})" \
+  --collision-strategy "{{ARG_COLLISION_STRATEGY}}" \
+  --venv-name "{{ARG_VENV_NAME}}" \
+  --include-default-site-packages
 
 PATH="${VIRTUAL_ENV}/bin:${PATH}"
 export PATH
@@ -54,8 +55,8 @@ export PATH
 # This should detect bash and zsh, which have a hash command that must
 # be called to get it to forget past commands.  Without forgetting
 # past commands the $PATH changes we made may not be respected
-if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
-    hash -r 2> /dev/null
+if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ]; then
+  hash -r 2>/dev/null
 fi
 
 exec "{{EXEC_PYTHON_BIN}}" {{INTERPRETER_FLAGS}} "$(rlocation {{ENTRYPOINT}})" "$@"
